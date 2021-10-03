@@ -54,7 +54,7 @@ export default {
 }
 
 .blink {
-  -webkit-animation: blink .5s linear infinite;
+  -webkit-animation: blink 1s linear infinite;
   animation: blink 1s linear infinite;
 }
 

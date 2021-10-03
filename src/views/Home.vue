@@ -29,14 +29,14 @@ export default {
       trafficLights: [
         // кол-во цветов и положение предупреждающего сигнала в массиве не влияют на работоспособность
         {color: 'yellow', duration: 3, isWarningColor: true},
-        {color: 'red', duration: 5},
-        {color: 'green', duration: 6},
+        {color: 'red', duration: 10},
+        {color: 'green', duration: 15},
       ],
       interval: null /* Переменная для очистки интервала в цикле beforeDestroy */,
       counter: 1, /* Переменная для сверки с длинной сигнала */
       activeLight: {}, /* Актуальный сигнал (не учитывает предупреждающий сигнал) */
       warningLight: {} /* Отдельная ссылка для быстрого доступа */,
-      warningActive: false /* Триггер для переодического включения предупреждающего сигнала */
+      warningActive: false /* Триггер для периодического включения предупреждающего сигнала */
     }
   },
   created() {
