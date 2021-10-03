@@ -10,49 +10,58 @@
         :blink-active="light.color === $route.params.color && light.duration + 1 - counter < 3"
       />
     </div>
+    <BaseButton
+      unpressed-text="Включить автосохранение?"
+      pressed-text="Выключить автосохранение и очистить память?"
+      :active="userWantsToStore"
+      @click.native="buttonClick"
+    />
   </div>
 </template>
 
 <script>
+import BaseButton from "@/components/BaseButton";
 import BaseLight from "@/components/BaseLight";
 
 export default {
   name: 'Home',
-  components: { BaseLight },
+  components: { BaseLight, BaseButton },
   data() {
     return {
       trafficLights: [
         // кол-во цветов и положение предупреждающего сигнала в массиве не влияют на работоспособность
-        {color: 'yellow', duration: 2, isWarningColor: true},
-        {color: 'red', duration: 3},
-        {color: 'green', duration: 4},
+        {color: 'red', duration: 5},
+        {color: 'yellow', duration: 3, isWarningColor: true},
+        {color: 'green', duration: 6},
       ],
       interval: null /* Переменная для очистки интервала в цикле beforeDestroy */,
       counter: 1, /* Переменная для сверки с длинной сигнала */
       activeLight: {}, /* Актуальный сигнал (не учитывает предупреждающий сигнал) */
       warningLight: {} /* Отдельная ссылка для быстрого доступа */,
-      warningActive: false /* Триггер для периодического включения предупреждающего сигнала */
+      warningActive: false, /* Триггер для периодического включения предупреждающего сигнала */
+      previousLight: {},
+      userWantsToStore: false
     }
   },
   created() {
     // Редирект в том случае, если присутствует хотя бы один элемент в списке цветов светофора
-    if (this.$route.path === '/' && this.trafficLights.length)
-      this.$router.push(this.trafficLights[0].color)
+    if (this.$route.path === '/' && this.trafficLights.length) this.$router.push(this.trafficLights[0].color)
     // Поиск цвета предупреждения в массиве
     this.warningLight = this.trafficLights.find(light => light.isWarningColor)
     // Авто включение тригера на переключение на следующий цвет, т.к. иначе будет двойное переключение на предупреждающий цвет
-    if (this.warningLight.color === this.$route.params.color)
-      this.warningActive = true
+    if (this.warningLight.color === this.$route.params.color) this.warningActive = true
 
+    if (JSON.parse(localStorage.getItem('userWantsToStore'))) {
+      this.userWantsToStore = true
+      this.localStorageRequest()
+    }
     this.activeLight = JSON.parse(JSON.stringify(this.trafficLights.find(light => light.color === this.$route.params.color)))
-
     this.countdown()
   },
   beforeDestroy() {
     clearInterval(this.interval)
   },
   methods: {
-    // управляющие функции
     countdown() {
       this.interval = setInterval(() => {
         this.counter++
@@ -60,10 +69,11 @@ export default {
           this.counter = 1
           this.warningActive ? this.switchLight() : this.enableWarningSignal()
         }
+        if (this.userWantsToStore) this.localStorageSet()
       }, 1000)
     },
     switchLight() {
-      const index = this.trafficLights.findIndex(light => light.color === this.activeLight.color)
+      const index = this.trafficLights.findIndex(light => light.color === this.previousLight.color)
 
       if (this.trafficLights.length === index + 1) { /* если конец списка */
         this.restartCycle()
@@ -73,10 +83,10 @@ export default {
       }
       this.warningActive = false
     },
-    // побочные функции
     enableWarningSignal() {
       this.$router.push(this.warningLight.color)
-      this.activeLight.duration = this.warningLight.duration
+      this.previousLight = this.activeLight
+      this.activeLight = this.warningLight
       this.warningActive = true
       console.log('enable warning signal')
     },
@@ -102,6 +112,28 @@ export default {
       const nextColor = this.trafficLights[index].color
       this.$router.push(nextColor)
       this.activeLight = JSON.parse(JSON.stringify(this.trafficLights[index]))
+    },
+    localStorageRequest() {
+      const activeLight = localStorage.getItem('activeLight')
+      const counter = localStorage.getItem('counter')
+      const previousLight = localStorage.getItem('previousLight')
+
+      if (activeLight && counter && previousLight) {
+        this.activeLight = JSON.parse(activeLight)
+        this.$router.push(this.activeLight.color).catch(() => {})
+        this.counter = JSON.parse(counter)
+        this.previousLight = JSON.parse(previousLight)
+      }
+    },
+    localStorageSet() {
+      localStorage.setItem('activeLight', JSON.stringify(this.activeLight))
+      localStorage.setItem('previousLight', JSON.stringify(this.previousLight))
+      localStorage.setItem('counter', JSON.stringify(this.counter))
+    },
+    buttonClick() {
+      if (this.userWantsToStore) localStorage.clear()
+      this.userWantsToStore = !this.userWantsToStore
+      localStorage.setItem('userWantsToStore', JSON.stringify(this.userWantsToStore))
     }
   }
 }
@@ -112,6 +144,7 @@ export default {
   width: 100vw;
   height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   background-color: #42b983;
