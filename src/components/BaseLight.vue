@@ -42,7 +42,7 @@ export default {
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  opacity: 10%;
+  opacity: 0.1;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -50,7 +50,7 @@ export default {
 }
 
 .lightActive {
-  opacity: 100% !important;
+  opacity: 1;
 }
 
 .blink {
@@ -60,13 +60,13 @@ export default {
 
 @-webkit-keyframes blink {
   100% {
-    opacity: 30%
+    opacity: 0.3
   }
 }
 
 @keyframes blink {
   100% {
-    opacity: 30%
+    opacity: 0.3
   }
 }
 
