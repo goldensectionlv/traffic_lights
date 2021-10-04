@@ -16,6 +16,8 @@
       :text-type-condition-show="userWantsToStore"
       @click.native="buttonClick"
     />
+
+    {{ $route.params.color }}
   </div>
 </template>
 
