@@ -29,9 +29,9 @@ export default {
   data() {
     return {
       trafficLights: [
-        {color: 'red', duration: 6},
+        {color: 'red', duration: 10},
         {color: 'yellow', duration: 3, isWarningColor: true},
-        {color: 'green', duration: 7},
+        {color: 'green', duration: 15},
       ],
       interval: null /* Переменная для очистки интервала в цикле beforeDestroy */,
       counter: 1, /* Переменная для сверки с длинной сигнала */
@@ -73,7 +73,6 @@ export default {
           this.warningActive ? this.switchLight() : this.enableWarningSignal()
         }
         if (this.userWantsToStore) this.localStorageSet()
-        console.log(typeof this.$route.params.color)
       }, 1000)
     },
     switchLight() {
