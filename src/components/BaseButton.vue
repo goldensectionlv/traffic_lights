@@ -25,7 +25,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .button {
   padding: 9px;
   border-radius: 9px;

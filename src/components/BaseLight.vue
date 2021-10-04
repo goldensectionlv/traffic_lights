@@ -37,7 +37,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .light {
   width: 100px;
   height: 100px;
