@@ -75,6 +75,7 @@ export default {
           this.warningActive ? this.switchLight() : this.enableWarningSignal()
         }
         if (this.userWantsToStore) this.localStorageSet()
+        console.log(typeof this.$route.params.color)
       }, 1000)
     },
     switchLight() {

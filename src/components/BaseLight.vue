@@ -50,7 +50,7 @@ export default {
 }
 
 .lightActive {
-  opacity: 100%;
+  opacity: 100% !important;
 }
 
 .blink {
