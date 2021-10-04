@@ -31,7 +31,7 @@ export default {
       trafficLights: [
         {color: 'red', duration: 6},
         {color: 'yellow', duration: 3, isWarningColor: true},
-        {color: 'green', duration: 5},
+        {color: 'green', duration: 7},
       ],
       interval: null /* Переменная для очистки интервала в цикле beforeDestroy */,
       counter: 1, /* Переменная для сверки с длинной сигнала */
@@ -54,9 +54,8 @@ export default {
     if (JSON.parse(localStorage.getItem('userWantsToStore'))) {
       this.userWantsToStore = true
       this.localStorageRequest()
-    } else {
-      this.activeLight = JSON.parse(JSON.stringify(this.trafficLights.find(light => light.color === this.$route.params.color)))
     }
+    this.activeLight = JSON.parse(JSON.stringify(this.trafficLights.find(light => light.color === this.$route.params.color)))
     this.lightsManager()
   },
   beforeDestroy() {
@@ -121,6 +120,7 @@ export default {
 
       if (activeLight && counter && previousLight) {
         this.activeLight = JSON.parse(activeLight)
+        this.warningActive = this.activeLight.color === this.warningLight.color;
         this.$router.push(this.activeLight.color).catch(() => {})
         this.counter = JSON.parse(counter)
         this.previousLight = JSON.parse(previousLight)
