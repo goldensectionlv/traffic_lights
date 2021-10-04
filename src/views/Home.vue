@@ -29,43 +29,45 @@ export default {
   data() {
     return {
       trafficLights: [
-        // кол-во цветов и положение предупреждающего сигнала в массиве не влияют на работоспособность
-        {color: 'red', duration: 5},
+        {color: 'red', duration: 6},
         {color: 'yellow', duration: 3, isWarningColor: true},
-        {color: 'green', duration: 6},
+        {color: 'green', duration: 5},
       ],
       interval: null /* Переменная для очистки интервала в цикле beforeDestroy */,
       counter: 1, /* Переменная для сверки с длинной сигнала */
-      activeLight: {}, /* Актуальный сигнал (не учитывает предупреждающий сигнал) */
-      warningLight: {} /* Отдельная ссылка для быстрого доступа */,
-      warningActive: false, /* Триггер для периодического включения предупреждающего сигнала */
-      previousLight: {},
+      activeLight: {}, /* Актуальный сигнал */
+      warningLight: {} /* Предупреждающий сигнал */,
+      warningActive: false, /* Триггер для включения предупреждающего сигнала */
+      previousLight: {}, /* Обьект для сохранения состояния прохождения по массиву после предупреждающего сигнала */
       userWantsToStore: false
     }
   },
   created() {
-    // Редирект в том случае, если присутствует хотя бы один элемент в списке цветов светофора
-    if (this.$route.path === '/' && this.trafficLights.length) this.$router.push(this.trafficLights[0].color)
-    // Поиск цвета предупреждения в массиве
+    const pathHomeAndLightsExists = this.$route.path === '/' && this.trafficLights.length
+    if (pathHomeAndLightsExists) this.$router.push(this.trafficLights[0].color)
+
     this.warningLight = this.trafficLights.find(light => light.isWarningColor)
-    // Авто включение тригера на переключение на следующий цвет, т.к. иначе будет двойное переключение на предупреждающий цвет
-    if (this.warningLight.color === this.$route.params.color) this.warningActive = true
+
+    const currentLightIsWarningType = this.warningLight.color === this.$route.params.color
+    if (currentLightIsWarningType) this.warningActive = true
 
     if (JSON.parse(localStorage.getItem('userWantsToStore'))) {
       this.userWantsToStore = true
       this.localStorageRequest()
+    } else {
+      this.activeLight = JSON.parse(JSON.stringify(this.trafficLights.find(light => light.color === this.$route.params.color)))
     }
-    this.activeLight = JSON.parse(JSON.stringify(this.trafficLights.find(light => light.color === this.$route.params.color)))
-    this.countdown()
+    this.lightsManager()
   },
   beforeDestroy() {
     clearInterval(this.interval)
   },
   methods: {
-    countdown() {
+    lightsManager() {
       this.interval = setInterval(() => {
         this.counter++
-        if (this.activeLight.duration < this.counter) {
+        const lightDurationEnded = this.activeLight.duration < this.counter
+        if (lightDurationEnded) {
           this.counter = 1
           this.warningActive ? this.switchLight() : this.enableWarningSignal()
         }
@@ -75,7 +77,8 @@ export default {
     switchLight() {
       const index = this.trafficLights.findIndex(light => light.color === this.previousLight.color)
 
-      if (this.trafficLights.length === index + 1) { /* если конец списка */
+      const isEndOfLightsArray = this.trafficLights.length === index + 1
+      if (isEndOfLightsArray) {
         this.restartCycle()
       } else {
         const isNextLightWarning = this.trafficLights[index + 1].color === this.warningLight.color
@@ -92,20 +95,18 @@ export default {
     },
 
     restartCycle() {
-      // Исключение, если предупреждающий свет стоит первым в массиве
       const isFirstInArray = (this.trafficLights.findIndex(light => light.color === this.warningLight.color)) === 0
       const index = isFirstInArray ? 1 : 0
       this.switchColor(index)
-      console.log('array end, refreshed')
+      console.log('array ended, cycle restarted')
     },
     jumpOverWarningSignal(index) {
-      // Исключение, если предупреждающий свет стоит последним в массиве
       const isLastInArray = this.trafficLights.length === this.trafficLights.findIndex(light => light.color === this.warningLight.color) + 1
       isLastInArray ? this.restartCycle() : this.switchColor(index + 2)
       console.log('jump over warning signal, avoid double enable of warning signal')
     },
     goToNextColor(index) {
-      this.switchColor(index + 1)
+      this.switchColor(index + 1) /* Специально не стал обьединять с функцией switchColor из логических соображений */
       console.log('go to next color in array')
     },
     switchColor(index) {
