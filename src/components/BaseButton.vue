@@ -1,6 +1,6 @@
 <template>
   <button class="button">
-    <span v-if="active">{{ pressedText }}</span>
+    <span v-if="textTypeConditionShow">{{ pressedText }}</span>
     <span v-else>{{ unpressedText }}</span>
   </button>
 </template>
@@ -17,7 +17,7 @@ export default {
       type: String,
       default: ''
     },
-    active: {
+    textTypeConditionShow: {
       type: Boolean,
       default: false
     }

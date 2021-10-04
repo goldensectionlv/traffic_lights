@@ -7,13 +7,13 @@
         :light-color="light.color"
         :is-active="light.color === $route.params.color"
         :countdown="light.color === $route.params.color ? light.duration + 1 - counter : null"
-        :blink-active="light.color === $route.params.color && light.duration + 1 - counter < 3"
+        :blink-active="light.color === $route.params.color && light.duration + 1 - counter < blinkingDuration"
       />
     </div>
     <BaseButton
       unpressed-text="Включить автосохранение?"
       pressed-text="Выключить автосохранение и очистить память?"
-      :active="userWantsToStore"
+      :text-type-condition-show="userWantsToStore"
       @click.native="buttonClick"
     />
   </div>
@@ -39,7 +39,8 @@ export default {
       warningLight: {} /* Предупреждающий сигнал */,
       warningActive: false, /* Триггер для включения предупреждающего сигнала */
       previousLight: {}, /* Обьект для сохранения состояния прохождения по массиву после предупреждающего сигнала */
-      userWantsToStore: false
+      userWantsToStore: false,
+      blinkingDuration: 3
     }
   },
   created() {
@@ -56,6 +57,7 @@ export default {
       this.localStorageRequest()
     }
     this.activeLight = JSON.parse(JSON.stringify(this.trafficLights.find(light => light.color === this.$route.params.color)))
+
     this.lightsManager()
   },
   beforeDestroy() {
